@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Configuration;
+using System.Data;
 
 namespace CheckPDriveFilesLength
 {
@@ -10,6 +11,7 @@ namespace CheckPDriveFilesLength
         static void Main(string[] args)
         {
             var appStart = DateTime.Now;
+            var teamLeaderLastName = DbConnect.GetTeamLeaderName("");
             var appSettings = ConfigurationManager.AppSettings;
             var searchPath = appSettings["searchPath"];
             var searchCriteria = "*.*";
@@ -69,5 +71,7 @@ namespace CheckPDriveFilesLength
                 Console.WriteLine("Could not log the file: " + e.ToString());
             }
         }
+
+
     }
 }
