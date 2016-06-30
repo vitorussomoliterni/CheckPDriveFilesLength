@@ -11,14 +11,11 @@ namespace CheckPDriveFilesLength
         {
             var appStart = DateTime.Now;
             var appSettings = ConfigurationManager.AppSettings;
-
             var searchPath = appSettings["searchPath"];
             var searchCriteria = "*.*";
             var charactersLimit = 245;
 
             var logText = DateTime.Now.ToShortDateString() + "\n";
-
-            var logPath = appSettings["logPath"];
 
             Console.WriteLine("Scanning " + searchPath + " for files with names longer than " + charactersLimit + " characters...");
 
@@ -40,15 +37,13 @@ namespace CheckPDriveFilesLength
             catch (Exception e)
             {
                 logText += "Application crashed\n";
-                logText += "Error message: " + e.Message.ToString();
+                logText += "Error message: " + e.ToString();
+                Console.WriteLine("Error: " + e.ToString());
             }
 
             finally
             {
-                using (StreamWriter w = File.AppendText(logPath))
-                {
-                    Log(logText, w);
-                }
+                Log(logText, appSettings["logPath"]);
             }
 
             var appEnd = DateTime.Now;
@@ -60,10 +55,19 @@ namespace CheckPDriveFilesLength
             Console.ReadLine();
         }
 
-        public static void Log(string logMessage, TextWriter w)
+        public static void Log(string message, string path)
         {
-            w.WriteLine(logMessage);
-            w.WriteLine("-------------------------------");
+            try
+            {
+                using (TextWriter w = File.CreateText(path))
+                {
+                    w.WriteLine(message);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Could not log the file: " + e.ToString());
+            }
         }
     }
 }
