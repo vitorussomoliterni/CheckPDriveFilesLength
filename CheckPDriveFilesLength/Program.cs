@@ -11,7 +11,7 @@ namespace CheckPDriveFilesLength
         static void Main(string[] args)
         {
             var appStart = DateTime.Now;
-            var teamLeaderLastName = DbConnect.GetTeamLeaderName("");
+            var teamLeaderLastName = DbConnect.GetTeamLeaderName("16033");
             var appSettings = ConfigurationManager.AppSettings;
             var searchPath = appSettings["searchPath"];
             var searchCriteria = "*.*";

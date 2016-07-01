@@ -13,42 +13,34 @@ namespace CheckPDriveFilesLength
         public static string GetTeamLeaderName(string projectNo)
         {
             var appSettings = ConfigurationManager.AppSettings;
-
-            var getLeaderId = "SELECT team_leader_id FROM " + appSettings["projectsTable"] + " WHERE number = " + projectNo + ";";
-            var leaderId = Connect(getLeaderId);
-
-            var getUserId = "SELECT user_id FROM " + appSettings["userProfilesTable"] + " WHERE id = " + leaderId + ";";
-            var userId = Connect(getUserId);
-
-            var getLeaderLastName = "SELECT last_name FROM " + appSettings["usersTable"] + " WHERE id = " + userId + ";";
-            var leaderLastName = Connect(getLeaderLastName);
-
-            return leaderLastName;
-        }
-
-        public static string Connect(string query)
-        {
-            var appSettings = ConfigurationManager.AppSettings;
             string connStr = appSettings["connectionString"];
             SqlConnection conn = new SqlConnection(connStr);
             try
             {
                 Console.WriteLine("Connecting to MySQL...");
                 conn.Open();
-                // Perform database operations
 
-                SqlCommand cmd = new SqlCommand(query, conn);
+                var getLeaderId = "SELECT team_leader_id FROM " + appSettings["projectsTable"] + " WHERE number = " + projectNo + ";";
+                SqlCommand getLeaderIdCmd = new SqlCommand(getLeaderId, conn);
+                var leaderId = getLeaderIdCmd.ExecuteScalar().ToString();
 
-                var result = cmd.ExecuteScalar().ToString();
+                var getUserId = "SELECT user_id FROM " + appSettings["userProfilesTable"] + " WHERE id = " + leaderId + ";";
+                SqlCommand getUserIdCmd = new SqlCommand(getUserId, conn);
+                var userId = getUserIdCmd.ExecuteScalar().ToString();
 
-                return result;
+                var getLeaderLastName = "SELECT last_name FROM " + appSettings["usersTable"] + " WHERE id = " + userId + ";";
+                SqlCommand getLeaderLastNameCmd = new SqlCommand(getLeaderLastName, conn);
+                var leaderLastName = getLeaderLastNameCmd.ExecuteScalar().ToString();
+
+                conn.Close();
+
+                return leaderLastName;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
             conn.Close();
-            Console.WriteLine("Done.");
             return null;
         }
     }
