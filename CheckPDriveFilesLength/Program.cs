@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Configuration;
 using System.Data;
+using DbConnect;
 
 namespace CheckPDriveFilesLength
 {
@@ -11,7 +12,7 @@ namespace CheckPDriveFilesLength
         static void Main(string[] args)
         {
             var appStart = DateTime.Now;
-            var teamLeaderLastName = DbConnect.GetTeamLeaderName("16033");
+            var teamLeaderLastName = GetTeamLeaderName.GetName("16033");
             var appSettings = ConfigurationManager.AppSettings;
             var searchPath = appSettings["searchPath"];
             var searchCriteria = "*.*";
