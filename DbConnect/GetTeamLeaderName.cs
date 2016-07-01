@@ -17,31 +17,42 @@ namespace DbConnect
                 {
                     if (con.State == ConnectionState.Closed)
                     {
-                        Console.WriteLine("Connecting to MySQL...");
                         con.Open();
                     }
 
                     var getLeaderId = "SELECT team_leader_id FROM " + details.ProjectsTable + " WHERE number = " + projectNo + ";";
                     MySqlCommand getLeaderIdCmd = new MySqlCommand(getLeaderId, con);
                     var leaderId = getLeaderIdCmd.ExecuteScalar().ToString();
-                    Console.WriteLine(leaderId);
+
+                    if (leaderId == null)
+                    {
+                        return null;
+                    }
 
                     var getUserId = "SELECT user_id FROM " + details.UserProfilesTable + " WHERE id = " + leaderId + ";";
                     MySqlCommand getUserIdCmd = new MySqlCommand(getUserId, con);
                     var userId = getUserIdCmd.ExecuteScalar().ToString();
-                    Console.WriteLine(userId);
+
+                    if (userId == null)
+                    {
+                        return null;
+                    }
 
                     var getLeaderLastName = "SELECT last_name FROM " + details.UsersTable + " WHERE id = " + userId + ";";
                     MySqlCommand getLeaderLastNameCmd = new MySqlCommand(getLeaderLastName, con);
                     var leaderLastName = getLeaderLastNameCmd.ExecuteScalar().ToString();
-                    Console.WriteLine(leaderLastName);
+
+                    if (leaderLastName == null)
+                    {
+                        return null;
+                    }
 
                     return leaderLastName;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine("MySQL error: {0}", ex.Message);
             }
             return null;
         }

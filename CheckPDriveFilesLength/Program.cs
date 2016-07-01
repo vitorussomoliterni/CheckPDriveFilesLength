@@ -4,15 +4,17 @@ using System.Linq;
 using System.Configuration;
 using System.Data;
 using DbConnect;
+using System.Collections.Generic;
 
 namespace CheckPDriveFilesLength
 {
     class Program
     {
+        public static string lastProjectChecked = "";
+        public static string lastProjectLeader = "";
         static void Main(string[] args)
         {
             var appStart = DateTime.Now;
-            var teamLeaderLastName = GetTeamLeaderName.GetName("16033");
             var appSettings = ConfigurationManager.AppSettings;
             var searchPath = appSettings["searchPath"];
             var searchCriteria = "*.*";
@@ -24,18 +26,7 @@ namespace CheckPDriveFilesLength
 
             try
             {
-                var files = from file in Directory.EnumerateFiles(searchPath, searchCriteria, SearchOption.AllDirectories)
-                            where file.Length > charactersLimit
-                            select new
-                            {
-                                File = file
-                            };
-
-                foreach (var f in files)
-                {
-                    logText += f.File + ";";
-                    logText += f.File.Length + "\n";
-                }
+                logText += printFileNames(logText, searchPath, searchCriteria, charactersLimit);
             }
             catch (Exception e)
             {
@@ -58,6 +49,48 @@ namespace CheckPDriveFilesLength
             Console.ReadLine();
         }
 
+        private static string printFileNames(string logText, string searchPath, string searchCriteria, int charactersLimit)
+        {
+            var files = from file in Directory.EnumerateFiles(searchPath, searchCriteria, SearchOption.AllDirectories) // Looks for files with names bigger than 245
+                        where file.Length > charactersLimit
+                        select new
+                        {
+                            File = file
+                        };
+
+            foreach (var f in files) // Iterates through the results
+            {
+                logText += f.File + ";";
+                logText += f.File.Length;
+                var projectNo = GetProjectNumber(f.File);
+                if (projectNo == lastProjectChecked) // Checks if the project leader has already been retrieved
+                {
+                    logText += ";" + lastProjectLeader + "\n";
+                }
+                else
+                {
+                    logText += FindTeamLeaderLastName(logText, projectNo);
+                }
+            }
+            return logText;
+        }
+
+        public static string FindTeamLeaderLastName(string text, string projectNo)
+        {
+            var teamLeaderLastName = GetTeamLeaderName.GetName(projectNo);
+            if (teamLeaderLastName == null)
+            {
+                text += ";None\n";
+            }
+            else
+            {
+                text += ";" + teamLeaderLastName + "\n";
+            }
+            lastProjectLeader = teamLeaderLastName;
+            lastProjectChecked = projectNo;
+            return text;
+        }
+
         public static void Log(string message, string path)
         {
             try
@@ -73,6 +106,10 @@ namespace CheckPDriveFilesLength
             }
         }
 
-
+        public static string GetProjectNumber(string fileName)
+        {
+            var projectNo = fileName.Substring(8, 5);
+            return projectNo;
+        }
     }
 }
