@@ -47,13 +47,13 @@ namespace CheckPDriveFilesLength
                         if (teamLeaderLastName == null)
                         {
                             logText += ";None\n";
-                            lastProjectLeader = ";None\n";
+                            lastProjectLeader = "None";
                         }
                         else
                         {
                             logText += ";" + teamLeaderLastName + "\n";
+                            lastProjectLeader = teamLeaderLastName;
                         }
-                        lastProjectLeader = teamLeaderLastName;
                         lastProjectChecked = projectNo;
                     }
                 }
@@ -77,22 +77,6 @@ namespace CheckPDriveFilesLength
             Console.WriteLine("Running time: {0:c}", runningTime);
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
-        }
-        
-        public static string FindTeamLeaderLastName(string text, string projectNo)
-        {
-            var teamLeaderLastName = GetTeamLeaderName.GetName(projectNo);
-            if (teamLeaderLastName == null)
-            {
-                text += ";None\n";
-            }
-            else
-            {
-                text += ";" + teamLeaderLastName + "\n";
-            }
-            lastProjectLeader = teamLeaderLastName;
-            lastProjectChecked = projectNo;
-            return text;
         }
 
         public static void Log(string message, string path)
