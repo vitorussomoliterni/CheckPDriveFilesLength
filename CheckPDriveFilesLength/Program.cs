@@ -4,7 +4,6 @@ using System.Linq;
 using System.Configuration;
 using System.Data;
 using DbConnect;
-using System.Collections.Generic;
 
 namespace CheckPDriveFilesLength
 {
@@ -26,7 +25,37 @@ namespace CheckPDriveFilesLength
 
             try
             {
-                logText += printFileNames(logText, searchPath, searchCriteria, charactersLimit);
+                var files = from file in Directory.EnumerateFiles(searchPath, searchCriteria, SearchOption.AllDirectories) // Looks for files with names bigger than 245
+                            where file.Length > charactersLimit
+                            select new
+                            {
+                                File = file
+                            };
+
+                foreach (var f in files) // Iterates through the results
+                {
+                    logText += f.File + ";";
+                    logText += f.File.Length;
+                    var projectNo = GetProjectNumber(f.File);
+                    if (projectNo == lastProjectChecked) // Checks if the project leader has already been retrieved
+                    {
+                        logText += ";" + lastProjectLeader + "\n";
+                    }
+                    else
+                    {
+                        var teamLeaderLastName = GetTeamLeaderName.GetName(projectNo);
+                        if (teamLeaderLastName == null)
+                        {
+                            logText += ";None\n";
+                        }
+                        else
+                        {
+                            logText += ";" + teamLeaderLastName + "\n";
+                        }
+                        lastProjectLeader = teamLeaderLastName;
+                        lastProjectChecked = projectNo;
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -48,33 +77,7 @@ namespace CheckPDriveFilesLength
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
         }
-
-        private static string printFileNames(string logText, string searchPath, string searchCriteria, int charactersLimit)
-        {
-            var files = from file in Directory.EnumerateFiles(searchPath, searchCriteria, SearchOption.AllDirectories) // Looks for files with names bigger than 245
-                        where file.Length > charactersLimit
-                        select new
-                        {
-                            File = file
-                        };
-
-            foreach (var f in files) // Iterates through the results
-            {
-                logText += f.File + ";";
-                logText += f.File.Length;
-                var projectNo = GetProjectNumber(f.File);
-                if (projectNo == lastProjectChecked) // Checks if the project leader has already been retrieved
-                {
-                    logText += ";" + lastProjectLeader + "\n";
-                }
-                else
-                {
-                    logText += FindTeamLeaderLastName(logText, projectNo);
-                }
-            }
-            return logText;
-        }
-
+        
         public static string FindTeamLeaderLastName(string text, string projectNo)
         {
             var teamLeaderLastName = GetTeamLeaderName.GetName(projectNo);
