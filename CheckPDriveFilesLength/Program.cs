@@ -47,6 +47,7 @@ namespace CheckPDriveFilesLength
                         if (teamLeaderLastName == null)
                         {
                             logText += ";None\n";
+                            lastProjectLeader = ";None\n";
                         }
                         else
                         {
