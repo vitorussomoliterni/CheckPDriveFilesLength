@@ -24,7 +24,7 @@ namespace DbConnect
                     MySqlCommand getLeaderIdCmd = new MySqlCommand(getLeaderId, con);
                     var leaderId = getLeaderIdCmd.ExecuteScalar().ToString();
 
-                    if (leaderId == null)
+                    if (leaderId.Equals(""))
                     {
                         return null;
                     }
@@ -33,7 +33,7 @@ namespace DbConnect
                     MySqlCommand getUserIdCmd = new MySqlCommand(getUserId, con);
                     var userId = getUserIdCmd.ExecuteScalar().ToString();
 
-                    if (userId == null)
+                    if (userId.Equals(""))
                     {
                         return null;
                     }
@@ -42,7 +42,7 @@ namespace DbConnect
                     MySqlCommand getLeaderLastNameCmd = new MySqlCommand(getLeaderLastName, con);
                     var leaderLastName = getLeaderLastNameCmd.ExecuteScalar().ToString();
 
-                    if (leaderLastName == null)
+                    if (leaderLastName.Equals(""))
                     {
                         return null;
                     }
