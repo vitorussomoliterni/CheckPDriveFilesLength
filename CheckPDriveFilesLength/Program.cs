@@ -13,25 +13,30 @@ namespace CheckPDriveFilesLength
         private static string lastProjectLeader = "";
         static void Main(string[] args)
         {
-            var selection = "";
+            var selection = new ConsoleKeyInfo();
+            var appSettings = ConfigurationManager.AppSettings;
 
-            while(selection == "")
+            while (true)
             {
                 GetMainMenu();
-                selection = Console.ReadLine();
+                selection = Console.ReadKey();
 
-                if (selection.Trim().Equals("1")) // Check specific folder
+                if (selection.KeyChar.Equals('1')) // Checks specific folder
                 {
+                    Console.WriteLine("\n");
                     GetSpecificProjectFileList();
                 }
-                else if (selection.Trim().Equals("2")) // Check whole P Drive
+                else if (selection.KeyChar.Equals('2')) // Checks whole P Drive
                 {
-                    GetLongFileNamesList();
+                    Console.WriteLine("\n");
+                    GetLongFileNamesList(appSettings["searchPath"], appSettings["logPath"] + "_" + DateTime.Now.ToShortDateString() + ".csv");
                 }
-                else if (selection.Trim().Equals("3")) { } // Exit application
+                else if (selection.KeyChar.Equals('3')) // Exits application
+                {
+                    Environment.Exit(0);
+                }
                 else
                 {
-                    selection = "";
                     Console.WriteLine("\nNo matches for your input, try again\n");
                 }
             }
@@ -40,13 +45,64 @@ namespace CheckPDriveFilesLength
         private static void GetSpecificProjectFileList()
         {
             var selection = "";
-            while (selection == "")
+            var appSettings = ConfigurationManager.AppSettings;
+            while (selection.Equals(""))
             {
-                Console.Write("Please insert project number: ");
+                Console.Write("Please insert project number and press enter (type 'back' to go back): ");
                 selection = Console.ReadLine().Trim();
+                int i;
+                bool selectionIsInt = int.TryParse(selection, out i); // Checks if user input is parsable
 
-
+                if (selection.Length == 5 && selectionIsInt) // Checks if user input consists in 5 numbers
+                {
+                    var projectPath = GetProjectPath(selection); // Gets project path
+                    if (projectPath == null)
+                    {
+                        selection = "";
+                        Console.WriteLine("No project found with that number");
+                    }
+                    else
+                    {
+                        GetLongFileNamesList(projectPath, appSettings["logPath"] + "_" + selection + ".csv");
+                    }
+                }
+                else if (selection.Trim().ToLower().Equals("back"))
+                {
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine("\nInvalid project number\n");
+                    selection = "";
+                }
             }
+        }
+
+        private static string GetProjectPath(string projectNumber)
+        {
+            var appSettings = ConfigurationManager.AppSettings;
+            var searchPattern = "*" + projectNumber + "_*";
+            var searchPath = appSettings["searchPath"] + "20" + projectNumber.Substring(0, 2);
+
+            try
+            {
+                var project = from file in Directory.EnumerateDirectories(searchPath, searchPattern, SearchOption.TopDirectoryOnly)
+                              select new
+                              {
+                                  Name = file
+                              };
+
+                foreach (var item in project) // Returns the first path found for that project
+                {
+                    return item.Name;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            return null;
         }
 
         private static void GetMainMenu()
@@ -79,11 +135,10 @@ namespace CheckPDriveFilesLength
             return projectNo;
         }
 
-        private static void GetLongFileNamesList()
+        private static void GetLongFileNamesList(string searchPath, string logPath)
         {
             var appStart = DateTime.Now;
             var appSettings = ConfigurationManager.AppSettings;
-            var searchPath = appSettings["searchPath"];
             var searchCriteria = "*.*";
             var charactersLimit = 245;
 
@@ -93,7 +148,7 @@ namespace CheckPDriveFilesLength
 
             try
             {
-                var files = from file in Directory.EnumerateFiles(searchPath, searchCriteria, SearchOption.AllDirectories) // Looks for files with names bigger than 245
+                var files = from file in Directory.EnumerateFiles(searchPath, searchCriteria, SearchOption.AllDirectories) // Looks for files with names bigger than 245 characters
                             where file.Length > charactersLimit
                             select new
                             {
@@ -135,7 +190,7 @@ namespace CheckPDriveFilesLength
 
             finally
             {
-                Log(logText, appSettings["logPath"]);
+                Log(logText, logPath);
             }
 
             var appEnd = DateTime.Now;
@@ -143,8 +198,8 @@ namespace CheckPDriveFilesLength
 
             Console.WriteLine("Scan finished");
             Console.WriteLine("Running time: {0:c}", runningTime);
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadLine();
+            Console.WriteLine("Press any key to go back to main menu");
+            Console.ReadKey();
         }
     }
 }

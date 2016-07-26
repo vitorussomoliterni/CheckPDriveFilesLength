@@ -47,7 +47,16 @@ namespace DbConnect
                         return null;
                     }
 
-                    return leaderLastName;
+                    var getLeaderPhoneNumber = "SELECT phone_number FROM " + details.UserProfilesTable + " WHERE id = " + userId + ";";
+                    MySqlCommand getLeaderPhoneNumberCmd = new MySqlCommand(getLeaderPhoneNumber, con);
+                    var leaderPhoneNumber = getLeaderPhoneNumberCmd.ExecuteScalar().ToString();
+
+                    if (leaderLastName.Equals(""))
+                    {
+                        leaderPhoneNumber = null;
+                    }
+
+                    return leaderLastName + ";" + leaderPhoneNumber;
                 }
             }
             catch (Exception ex)
